@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'dart:io';
 
@@ -15,34 +15,42 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: PhotoPage(),
+      home: HomeScreen(),
     );
   }
 }
 
-class PhotoPage extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  _PhotoPageState createState() => _PhotoPageState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _PhotoPageState extends State<PhotoPage> {
-  final ImagePicker _picker = ImagePicker();
-  List<String> _photosUrls = [];
+class _HomeScreenState extends State<HomeScreen> {
+  File? _image;
+  final picker = ImagePicker();
+  final storage = FirebaseStorage.instance;
 
-  Future<void> _takePhoto() async {
-    final pickedFile = await _picker.getImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-      String fileName = path.basename(imageFile.path);
-      UploadTask uploadTask =
-          FirebaseStorage.instance.ref('photos/$fileName').putFile(imageFile);
+  Future getImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+        uploadFile();
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
 
-      setState(() {
-        _photosUrls.add(downloadUrl);
-      });
+  Future uploadFile() async {
+    if (_image == null) return;
+    String fileName = path.basename(_image!.path);
+    try {
+      await storage.ref('uploads/$fileName').putFile(_image!);
+      print('File Uploaded');
+    } on FirebaseException catch (e) {
+      print(e);
     }
   }
 
@@ -52,21 +60,14 @@ class _PhotoPageState extends State<PhotoPage> {
       appBar: AppBar(
         title: Text('Photo App'),
       ),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: _takePhoto,
-            child: Text('Take Photo'),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _photosUrls.length,
-              itemBuilder: (context, index) {
-                return Image.network(_photosUrls[index]);
-              },
-            ),
-          ),
-        ],
+      body: Center(
+        child:
+            _image == null ? Text('No image selected.') : Image.file(_image!),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: getImage,
+        tooltip: 'Pick Image',
+        child: Icon(Icons.add_a_photo),
       ),
     );
   }

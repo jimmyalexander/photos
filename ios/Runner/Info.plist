@@ -41,17 +41,11 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
-    <key>CADisableMinimumFrameDurationOnPhone</key>
-    <true/>
-    <key>UIApplicationSupportsIndirectInputEvents</key>
-    <true/>
-
-    <!-- Permisos para la cámara y la galería -->
     <key>NSCameraUsageDescription</key>
-    <string>Esta aplicación necesita acceso a la cámara para tomar fotos.</string>
+    <string>This app needs access to the camera to take photos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Esta aplicación necesita acceso a la biblioteca de fotos para seleccionar imágenes.</string>
+    <string>This app needs access to the photo library to save photos.</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Esta aplicación necesita permiso para guardar fotos en la biblioteca.</string>
+    <string>This app needs access to add photos to your library.</string>
 </dict>
 </plist>
